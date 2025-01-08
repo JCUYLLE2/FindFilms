@@ -1,49 +1,128 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, Image, TouchableOpacity, Dimensions } from 'react-native';
 
-const DetailsScreen = ({ route }) => {
+const { width } = Dimensions.get('window');
+
+const DetailsScreen = ({ route, navigation }) => {
   const { movie } = route.params;
 
+  // Stel een limiet in voor de breedte en hoogte van de afbeelding
+  const imageWidth = Math.min(width - 40, 300); // Max 300px breedte
+  const imageHeight = (imageWidth / 2) * 3; // Verhouding 2:3
+
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
+      {/* Terugknop */}
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.goBack()}
+      >
+        <Text style={styles.backButtonText}>← Terug</Text>
+      </TouchableOpacity>
+
+      {/* Film Detail */}
       <Image
         source={{ uri: `https://image.tmdb.org/t/p/w500${movie.poster_path}` }}
-        style={styles.poster}
+        style={[styles.poster, { width: imageWidth, height: imageHeight }]}
+        resizeMode="contain" // Behoud originele verhoudingen
       />
-      <Text style={styles.title}>{movie.title}</Text>
-      <Text style={styles.overview}>{movie.overview}</Text>
-      <Text style={styles.rating}>Rating: {movie.vote_average}/10</Text>
-    </View>
+
+      {/* Kader voor titel, beschrijving en details */}
+      <View style={styles.detailsContainer}>
+        {/* Titel en Beschrijving */}
+        <View style={styles.textContainer}>
+          <Text style={styles.title}>{movie.title}</Text>
+          <Text style={styles.overview}>{movie.overview}</Text>
+        </View>
+
+        {/* Details */}
+        <View style={styles.extraDetails}>
+          <Text style={styles.detail}>
+            <Text style={styles.detailLabel}>Originele Titel:</Text> {movie.original_title}
+          </Text>
+          <Text style={styles.detail}>
+            <Text style={styles.detailLabel}>Taal:</Text> {movie.original_language.toUpperCase()}
+          </Text>
+          <Text style={styles.detail}>
+            <Text style={styles.detailLabel}>Populariteit:</Text> {movie.popularity}
+          </Text>
+          <Text style={styles.detail}>
+            <Text style={styles.detailLabel}>Release Datum:</Text> {movie.release_date}
+          </Text>
+          <Text style={styles.detail}>
+            <Text style={styles.detailLabel}>Video Beschikbaar:</Text> {movie.video ? 'Ja' : 'Nee'}
+          </Text>
+          <Text style={styles.detail}>
+            <Text style={styles.detailLabel}>Gemiddelde Score:</Text> {movie.vote_average}/10
+          </Text>
+          <Text style={styles.detail}>
+            <Text style={styles.detailLabel}>Aantal Stemmen:</Text> {movie.vote_count}
+          </Text>
+        </View>
+      </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#382E31', // Donkergrijze achtergrond
     padding: 20,
-    backgroundColor: '#fff',
+  },
+  backButton: {
+    backgroundColor: '#AC274F', // Dieproze
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+    marginBottom: 20, // Ruimte onder de knop
+    alignSelf: 'flex-start', // Zorg dat de knop links uitlijnt
+  },
+  backButtonText: {
+    color: '#FFD9DA', // Zachtroze tekstkleur
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   poster: {
-    width: '100%',
-    height: 300,
     borderRadius: 10,
+    marginBottom: 20, // Ruimte onder de afbeelding
+    alignSelf: 'center', // Centreer de afbeelding
+  },
+  detailsContainer: {
+    backgroundColor: '#191516', // Donkere achtergrond voor details
+    padding: 15,
+    borderRadius: 10,
+    flexDirection: 'row', // Titel/beschrijving links, details rechts
+    justifyContent: 'space-between',
+  },
+  textContainer: {
+    flex: 1, // Neem de linkerhelft
+    paddingRight: 10, // Ruimte tussen tekst en details
   },
   title: {
-    marginTop: 20,
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
-    textAlign: 'center',
+    color: '#FFD9DA', // Zachtroze
+    marginBottom: 10,
   },
   overview: {
-    marginTop: 10,
     fontSize: 16,
-    textAlign: 'justify',
+    color: '#EB638B', // Roze tekstkleur
+    lineHeight: 22, // Maak de tekst wat leesbaarder
+    marginBottom: 20, // Ruimte onder de beschrijving
   },
-  rating: {
-    marginTop: 10,
-    fontSize: 18,
+  extraDetails: {
+    flex: 1, // Neem de rechterhelft
+    paddingLeft: 10, // Ruimte tussen details en tekst
+  },
+  detail: {
+    fontSize: 14,
+    color: '#FFD9DA', // Zachtroze
+    marginBottom: 8,
+  },
+  detailLabel: {
     fontWeight: 'bold',
-    textAlign: 'center',
+    color: '#EB638B', // Roze tekstkleur voor labels
   },
 });
 
