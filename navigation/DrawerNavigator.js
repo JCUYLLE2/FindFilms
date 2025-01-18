@@ -5,6 +5,7 @@ import HomeScreen from '../screens/HomeScreen';
 import SearchScreen from '../screens/SearchScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import LoginScreen from '../screens/LoginScreen';
+import DetailsScreen from '../screens/DetailsScreen';
 
 const Drawer = createDrawerNavigator();
 
@@ -34,6 +35,12 @@ const DrawerNavigator = () => {
         <Drawer.Screen name="Search" component={SearchScreen} />
         <Drawer.Screen name="Login" component={LoginScreen} />
         <Drawer.Screen name="Register" component={RegisterScreen} />
+        {/* Verberg DetailsScreen door options met headerShown: false */}
+        <Drawer.Screen
+          name="Details"
+          component={DetailsScreen}
+          options={{ drawerLabel: () => null, title: undefined, drawerIcon: () => null }}
+        />
       </Drawer.Navigator>
     </NavigationContainer>
   );
