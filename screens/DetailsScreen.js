@@ -10,6 +10,9 @@ const DetailsScreen = ({ route, navigation }) => {
   const imageWidth = Math.min(width - 40, 300); // Max 300px breedte
   const imageHeight = (imageWidth / 2) * 3; // Verhouding 2:3
 
+  // Rond de gemiddelde score af naar 1 decimaal
+  const roundedVoteAverage = movie.vote_average.toFixed(1);
+
   return (
     <ScrollView style={styles.container}>
       {/* Terugknop */}
@@ -53,11 +56,13 @@ const DetailsScreen = ({ route, navigation }) => {
             <Text style={styles.detailLabel}>Video Beschikbaar:</Text> {movie.video ? 'Ja' : 'Nee'}
           </Text>
           <Text style={styles.detail}>
-            <Text style={styles.detailLabel}>Gemiddelde Score:</Text> {movie.vote_average}/10
-          </Text>
-          <Text style={styles.detail}>
             <Text style={styles.detailLabel}>Aantal Stemmen:</Text> {movie.vote_count}
           </Text>
+          <View style={[styles.scoreContainer, { width: width > 600 ? 200 : '100%' }]}>
+  <Text style={styles.scoreLabel}>Gemiddelde Score:</Text>
+  <Text style={styles.scoreValue}>{roundedVoteAverage}/10</Text>
+</View>
+
         </View>
       </View>
     </ScrollView>
@@ -123,6 +128,27 @@ const styles = StyleSheet.create({
   detailLabel: {
     fontWeight: 'bold',
     color: '#EB638B', // Roze tekstkleur voor labels
+  },
+ scoreContainer: {
+  marginTop: 10,
+  marginBottom: 10,
+  padding: 10,
+  backgroundColor: '#AC274F', // Achtergrondkleur voor de score
+  borderRadius: 10,
+  alignItems: 'center',
+  alignSelf: 'center', // Zorg dat het kader gecentreerd is
+},
+
+  scoreLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFD9DA',
+    marginBottom: 5,
+  },
+  scoreValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FFD9DA',
   },
 });
 
