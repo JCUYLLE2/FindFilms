@@ -32,17 +32,15 @@ const HomeScreen = ({ navigation }) => {
     fetchMovies();
   }, []);
 
-const calculateImageDimensions = () => {
-  const isMobile = width < 600; // Check of het een mobiel scherm is
-  const minWidth = isMobile ? 120 : 150; // Kleinere breedte voor mobiel
-  const spacing = 10; // Ruimte tussen de afbeeldingen
-  const columns = Math.floor(width / (minWidth + spacing)); // Dynamisch aantal kolommen
-  const imageWidth = (width - spacing * (columns + 1)) / columns; // Bereken breedte van afbeelding
-  const imageHeight = imageWidth * 1.5; // Behoud aspect ratio (2:3)
-  return { imageWidth, imageHeight, columns };
-};
-
-
+  const calculateImageDimensions = () => {
+    const isMobile = width < 600; // Check of het een mobiel scherm is
+    const minWidth = isMobile ? 120 : 150; // Kleinere breedte voor mobiel
+    const spacing = 10; // Ruimte tussen de afbeeldingen
+    const columns = Math.floor(width / (minWidth + spacing)); // Dynamisch aantal kolommen
+    const imageWidth = (width - spacing * (columns + 1)) / columns; // Bereken breedte van afbeelding
+    const imageHeight = imageWidth * 1.5; // Behoud aspect ratio (2:3)
+    return { imageWidth, imageHeight, columns };
+  };
 
   const renderMovies = (movies, title) => {
     const { imageWidth, imageHeight } = calculateImageDimensions();
