@@ -59,10 +59,9 @@ const DetailsScreen = ({ route, navigation }) => {
             <Text style={styles.detailLabel}>Aantal Stemmen:</Text> {movie.vote_count}
           </Text>
           <View style={[styles.scoreContainer, { width: width > 600 ? 200 : '100%' }]}>
-  <Text style={styles.scoreLabel}>Gemiddelde Score:</Text>
-  <Text style={styles.scoreValue}>{roundedVoteAverage}/10</Text>
-</View>
-
+            <Text style={styles.scoreLabel}>Gemiddelde Score:</Text>
+            <Text style={styles.scoreValue}>{roundedVoteAverage}/10</Text>
+          </View>
         </View>
       </View>
     </ScrollView>
@@ -129,16 +128,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#EB638B', // Roze tekstkleur voor labels
   },
- scoreContainer: {
-  marginTop: 10,
-  marginBottom: 10,
-  padding: 10,
-  backgroundColor: '#AC274F', // Achtergrondkleur voor de score
-  borderRadius: 10,
-  alignItems: 'center',
-  alignSelf: 'center', // Zorg dat het kader gecentreerd is
-},
-
+  scoreContainer: {
+    marginTop: 10,
+    marginBottom: 10,
+    padding: 10,
+    backgroundColor: '#AC274F', // Achtergrondkleur voor de score
+    borderRadius: 10,
+    alignItems: 'center',
+    alignSelf: 'center', // Zorg dat het kader gecentreerd is
+  },
   scoreLabel: {
     fontSize: 16,
     fontWeight: 'bold',

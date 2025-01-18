@@ -11,6 +11,8 @@ import ProfileScreen from '../screens/ProfileScreen';
 import FavoritesScreen from '../screens/FavoritesScreen';
 import { auth } from '../firebaseConfig';
 
+
+
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
 
@@ -23,7 +25,12 @@ const HomeStack = () => {
       }}
     >
       <Stack.Screen name="Home" component={HomeScreen} />
-      <Stack.Screen name="Details" component={DetailsScreen} />
+      <Stack.Screen 
+  name="Details" 
+  component={DetailsScreen} 
+  options={{ headerShown: false }} // Zet dit naar true als je een header wilt zien
+/>
+
     </Stack.Navigator>
   );
 };
