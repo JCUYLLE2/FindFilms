@@ -1,5 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, Text, View, Image, StyleSheet, Dimensions, TouchableWithoutFeedback, TouchableOpacity } from 'react-native';
+import {
+  ScrollView,
+  Text,
+  View,
+  Image,
+  StyleSheet,
+  Dimensions,
+  TouchableWithoutFeedback,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
+import { auth, db } from '../firebaseConfig';
+import { collection, doc, setDoc, deleteDoc, getDocs } from 'firebase/firestore';
 
 const { width } = Dimensions.get('window');
 
@@ -7,6 +19,7 @@ const HomeScreen = ({ navigation }) => {
   const [popularMovies, setPopularMovies] = useState([]);
   const [newMovies, setNewMovies] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [favoriteMovieIds, setFavoriteMovieIds] = useState([]);
 
   useEffect(() => {
     const fetchMovies = async () => {
@@ -32,13 +45,53 @@ const HomeScreen = ({ navigation }) => {
     fetchMovies();
   }, []);
 
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      if (!auth.currentUser) return;
+      try {
+        const colRef = collection(db, 'users', auth.currentUser.uid, 'favorites');
+        const querySnapshot = await getDocs(colRef);
+        const favIds = querySnapshot.docs.map((doc) => doc.id);
+        setFavoriteMovieIds(favIds);
+      } catch (error) {
+        console.error('Error fetching favorites:', error);
+      }
+    };
+
+    fetchFavorites();
+  }, []);
+
+  const handleFavorite = async (movie) => {
+    if (!auth.currentUser) {
+      Alert.alert('Niet ingelogd', 'Log in om films als favoriet toe te voegen.');
+      return;
+    }
+    const movieIdString = String(movie.id);
+    const isFavorite = favoriteMovieIds.includes(movieIdString);
+
+    try {
+      if (isFavorite) {
+        await deleteDoc(doc(db, 'users', auth.currentUser.uid, 'favorites', movieIdString));
+        setFavoriteMovieIds((prev) => prev.filter((id) => id !== movieIdString));
+      } else {
+        await setDoc(doc(db, 'users', auth.currentUser.uid, 'favorites', movieIdString), {
+          title: movie.title,
+          poster_path: movie.poster_path,
+        });
+        setFavoriteMovieIds((prev) => [...prev, movieIdString]);
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+    }
+  };
+
   const calculateImageDimensions = () => {
-    const isMobile = width < 600; // Check of het een mobiel scherm is
-    const minWidth = isMobile ? 120 : 150; // Kleinere breedte voor mobiel
-    const spacing = 10; // Ruimte tussen de afbeeldingen
-    const columns = Math.floor(width / (minWidth + spacing)); // Dynamisch aantal kolommen
-    const imageWidth = (width - spacing * (columns + 1)) / columns; // Bereken breedte van afbeelding
-    const imageHeight = imageWidth * 1.5; // Behoud aspect ratio (2:3)
+    const isMobile = width < 600;
+    const minWidth = isMobile ? 120 : 150;
+    const spacing = 10;
+    const columns = Math.floor(width / (minWidth + spacing));
+    const imageWidth = (width - spacing * (columns + 1)) / columns;
+    const imageHeight = imageWidth * 1.5;
     return { imageWidth, imageHeight, columns };
   };
 
@@ -50,21 +103,31 @@ const HomeScreen = ({ navigation }) => {
         <Text style={styles.sectionTitle}>{title}</Text>
         <View style={styles.galleryWrapper}>
           <View style={styles.gallery}>
-            {movies.map((item) => (
-              <TouchableWithoutFeedback
-                key={item.id}
-                onPress={() => navigation.navigate('Details', { movie: item })}
-              >
-                <View style={styles.movieCard}>
-                  <Image
-                    source={{ uri: `https://image.tmdb.org/t/p/w500${item.poster_path}` }}
-                    style={[styles.poster, { width: imageWidth, height: imageHeight }]}
-                    resizeMode="cover"
-                  />
-                  <Text style={[styles.title, { width: imageWidth }]}>{item.title}</Text>
-                </View>
-              </TouchableWithoutFeedback>
-            ))}
+            {movies.map((item) => {
+              const movieIdString = String(item.id);
+              const isFavorite = favoriteMovieIds.includes(movieIdString);
+
+              return (
+                <TouchableWithoutFeedback
+                  key={item.id}
+                  onPress={() => navigation.navigate('Details', { movie: item })}
+                >
+                  <View style={styles.movieCard}>
+                    <Image
+                      source={{ uri: `https://image.tmdb.org/t/p/w500${item.poster_path}` }}
+                      style={[styles.poster, { width: imageWidth, height: imageHeight }]}
+                      resizeMode="cover"
+                    />
+                    <View style={[styles.titleRow, { width: imageWidth }]}>
+                      <Text style={styles.title}>{item.title}</Text>
+                      <TouchableOpacity onPress={() => handleFavorite(item)}>
+                        <Text style={styles.heartText}>{isFavorite ? '❤️' : '🤍'}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </TouchableWithoutFeedback>
+              );
+            })}
           </View>
         </View>
       </>

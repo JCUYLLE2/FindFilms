@@ -14,16 +14,22 @@ import { auth } from '../firebaseConfig';
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
 
-// HomeStack voor HomeScreen en DetailsScreen
+// Maak een HomeStack voor HomeScreen en DetailsScreen
 const HomeStack = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerShown: false, // Voorkomt dubbele header door de Stack
+        headerStyle: {
+          backgroundColor: '#2E282A',
+        },
+        headerTintColor: '#FFD9DA',
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
       }}
     >
-      <Stack.Screen name="Home" component={HomeScreen} />
-      <Stack.Screen name="Details" component={DetailsScreen} />
+      <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Home' }} />
+      <Stack.Screen name="Details" component={DetailsScreen} options={{ title: 'Details' }} />
     </Stack.Navigator>
   );
 };
@@ -35,7 +41,7 @@ const DrawerNavigator = () => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setCurrentUser(user);
     });
-    return unsubscribe;
+    return unsubscribe; // Cleanup bij unmount
   }, []);
 
   return (
@@ -59,7 +65,6 @@ const DrawerNavigator = () => {
           },
         }}
       >
-        {/* Home navigatie via HomeStack */}
         <Drawer.Screen
           name="HomeStack"
           component={HomeStack}
