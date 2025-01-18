@@ -9,27 +9,22 @@ import RegisterScreen from '../screens/RegisterScreen';
 import LoginScreen from '../screens/LoginScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import FavoritesScreen from '../screens/FavoritesScreen';
+import LogoutScreen from '../screens/LogoutScreen'; // Importeer LogoutScreen
 import { auth } from '../firebaseConfig';
 
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
 
-// Maak een HomeStack voor HomeScreen en DetailsScreen
+// HomeStack voor HomeScreen en DetailsScreen
 const HomeStack = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerStyle: {
-          backgroundColor: '#2E282A',
-        },
-        headerTintColor: '#FFD9DA',
-        headerTitleStyle: {
-          fontWeight: 'bold',
-        },
+        headerShown: false, // Voorkomt dubbele headers
       }}
     >
-      <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Home' }} />
-      <Stack.Screen name="Details" component={DetailsScreen} options={{ title: 'Details' }} />
+      <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen name="Details" component={DetailsScreen} />
     </Stack.Navigator>
   );
 };
@@ -41,7 +36,7 @@ const DrawerNavigator = () => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setCurrentUser(user);
     });
-    return unsubscribe; // Cleanup bij unmount
+    return unsubscribe; // Cleanup
   }, []);
 
   return (
@@ -65,6 +60,7 @@ const DrawerNavigator = () => {
           },
         }}
       >
+        {/* Home navigatie via HomeStack */}
         <Drawer.Screen
           name="HomeStack"
           component={HomeStack}
@@ -90,6 +86,11 @@ const DrawerNavigator = () => {
               name="Favorites"
               component={FavoritesScreen}
               options={{ title: 'Favorieten' }}
+            />
+            <Drawer.Screen
+              name="Logout"
+              component={LogoutScreen}
+              options={{ title: 'Logout' }}
             />
           </>
         )}
