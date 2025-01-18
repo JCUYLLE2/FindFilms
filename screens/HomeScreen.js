@@ -11,14 +11,12 @@ const HomeScreen = ({ navigation }) => {
   useEffect(() => {
     const fetchMovies = async () => {
       try {
-        // Fetch populaire films
         const popularResponse = await fetch(
           'https://api.themoviedb.org/3/movie/popular?api_key=daaaf1fbc930fa09a01032c6e26611e5&language=en-US&page=1'
         );
         const popularData = await popularResponse.json();
         setPopularMovies(popularData.results);
 
-        // Fetch nieuwste films (Now Playing)
         const newResponse = await fetch(
           'https://api.themoviedb.org/3/movie/now_playing?api_key=daaaf1fbc930fa09a01032c6e26611e5&language=en-US&page=1'
         );
@@ -34,15 +32,46 @@ const HomeScreen = ({ navigation }) => {
     fetchMovies();
   }, []);
 
-  const calculateImageDimensions = () => {
-    const columns = 5; // Aantal afbeeldingen per rij
-    const spacing = 10;
-    const imageWidth = (width - spacing * (columns + 1)) / columns;
-    const imageHeight = imageWidth * 1.5;
-    return { imageWidth, imageHeight };
-  };
+const calculateImageDimensions = () => {
+  const isMobile = width < 600; // Check of het een mobiel scherm is
+  const minWidth = isMobile ? 120 : 150; // Kleinere breedte voor mobiel
+  const spacing = 10; // Ruimte tussen de afbeeldingen
+  const columns = Math.floor(width / (minWidth + spacing)); // Dynamisch aantal kolommen
+  const imageWidth = (width - spacing * (columns + 1)) / columns; // Bereken breedte van afbeelding
+  const imageHeight = imageWidth * 1.5; // Behoud aspect ratio (2:3)
+  return { imageWidth, imageHeight, columns };
+};
 
-  const { imageWidth, imageHeight } = calculateImageDimensions();
+
+
+  const renderMovies = (movies, title) => {
+    const { imageWidth, imageHeight } = calculateImageDimensions();
+
+    return (
+      <>
+        <Text style={styles.sectionTitle}>{title}</Text>
+        <View style={styles.galleryWrapper}>
+          <View style={styles.gallery}>
+            {movies.map((item) => (
+              <TouchableWithoutFeedback
+                key={item.id}
+                onPress={() => navigation.navigate('Details', { movie: item })}
+              >
+                <View style={styles.movieCard}>
+                  <Image
+                    source={{ uri: `https://image.tmdb.org/t/p/w500${item.poster_path}` }}
+                    style={[styles.poster, { width: imageWidth, height: imageHeight }]}
+                    resizeMode="cover"
+                  />
+                  <Text style={[styles.title, { width: imageWidth }]}>{item.title}</Text>
+                </View>
+              </TouchableWithoutFeedback>
+            ))}
+          </View>
+        </View>
+      </>
+    );
+  };
 
   if (loading) {
     return (
@@ -52,29 +81,6 @@ const HomeScreen = ({ navigation }) => {
     );
   }
 
-  const renderMovies = (movies, title) => (
-    <>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      <View style={styles.gallery}>
-        {movies.map((item) => (
-          <TouchableWithoutFeedback
-            key={item.id}
-            onPress={() => navigation.navigate('Details', { movie: item })}
-          >
-            <View style={styles.movieItem}>
-              <Image
-                source={{ uri: `https://image.tmdb.org/t/p/w500${item.poster_path}` }}
-                style={[styles.poster, { width: imageWidth, height: imageHeight }]}
-                resizeMode="cover"
-              />
-              <Text style={[styles.title, { width: imageWidth }]}>{item.title}</Text>
-            </View>
-          </TouchableWithoutFeedback>
-        ))}
-      </View>
-    </>
-  );
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.pageTitle}>Welkom bij FindFilms</Text>
@@ -82,7 +88,6 @@ const HomeScreen = ({ navigation }) => {
         Ontdek de populairste films, nieuwste releases en sla je favorieten op!
       </Text>
 
-      {/* Zoekfunctie knop */}
       <TouchableOpacity
         style={styles.searchButton}
         onPress={() => navigation.navigate('Search')}
@@ -90,7 +95,6 @@ const HomeScreen = ({ navigation }) => {
         <Text style={styles.searchButtonText}>Zoek naar jouw favoriete film</Text>
       </TouchableOpacity>
 
-      {/* Secties voor films */}
       {renderMovies(popularMovies, 'Populaire Films')}
       {renderMovies(newMovies, 'Nieuwste Films')}
 
@@ -131,16 +135,16 @@ const styles = StyleSheet.create({
     color: '#EB638B',
   },
   searchButton: {
-    backgroundColor: '#AC274F', // Dieproze kleur
+    backgroundColor: '#AC274F',
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 30, // Maak de hoeken rond voor een knopachtig uiterlijk
-    alignSelf: 'center', // Centreer de knop
-    shadowColor: '#000', // Schaduw voor meer dimensie
+    borderRadius: 30,
+    alignSelf: 'center',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    elevation: 5, // Voor Android schaduw
+    elevation: 5,
   },
   searchButtonText: {
     fontSize: 16,
@@ -153,27 +157,33 @@ const styles = StyleSheet.create({
     color: '#FFD9DA',
     marginVertical: 15,
   },
+  galleryWrapper: {
+    marginHorizontal: 10,
+    padding: 10,
+    backgroundColor: '#191516',
+    borderRadius: 10,
+  },
   gallery: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
-  movieItem: {
-    marginBottom: 20,
+  movieCard: {
     alignItems: 'center',
+    borderRadius: 10,
+    marginBottom: 20,
+    backgroundColor: '#191516',
+    padding: 10,
   },
   poster: {
     borderRadius: 10,
   },
   title: {
-    marginTop: 10,
-    fontSize: 16,
+    marginTop: 5,
+    fontSize: 14,
     fontWeight: '600',
     textAlign: 'center',
     color: '#FFD9DA',
-    backgroundColor: '#191516',
-    padding: 10,
-    borderRadius: 5,
   },
   footer: {
     marginTop: 20,
@@ -185,6 +195,5 @@ const styles = StyleSheet.create({
     color: '#EB638B',
   },
 });
-
 
 export default HomeScreen;
