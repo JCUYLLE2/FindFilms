@@ -6,7 +6,7 @@ import {
   Image,
   StyleSheet,
   Dimensions,
-  TouchableWithoutFeedback,
+  Pressable, // Gebruik Pressable in plaats van TouchableWithoutFeedback
   TouchableOpacity,
   Alert,
 } from 'react-native';
@@ -108,8 +108,8 @@ const HomeScreen = ({ navigation }) => {
               const isFavorite = favoriteMovieIds.includes(movieIdString);
 
               return (
-                <TouchableWithoutFeedback
-                  key={item.id}
+                <Pressable
+                  key={item.id} // Gebruik Pressable in plaats van TouchableWithoutFeedback
                   onPress={() => navigation.navigate('Details', { movie: item })}
                 >
                   <View style={styles.movieCard}>
@@ -125,7 +125,7 @@ const HomeScreen = ({ navigation }) => {
                       </TouchableOpacity>
                     </View>
                   </View>
-                </TouchableWithoutFeedback>
+                </Pressable> // Vervang ook hier TouchableWithoutFeedback door Pressable
               );
             })}
           </View>

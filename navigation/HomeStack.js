@@ -63,7 +63,7 @@ const DrawerNavigator = () => {
         {/* Home navigatie via HomeStack */}
         <Drawer.Screen
           name="HomeStack"
-          component={HomeStack}
+          component={HomeStack} // Gebruik HomeStack als navigatiecomponent
           options={{ title: 'Home' }}
         />
         <Drawer.Screen name="Search" component={SearchScreen} />

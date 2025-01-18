@@ -19,7 +19,7 @@ const HomeStack = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerShown: false, // Voorkomt dubbele header door de Stack
+        headerShown: false, // Voorkomt dubbele headers
       }}
     >
       <Stack.Screen name="Home" component={HomeScreen} />
@@ -35,7 +35,7 @@ const DrawerNavigator = () => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setCurrentUser(user);
     });
-    return unsubscribe;
+    return unsubscribe; // Cleanup
   }, []);
 
   return (
@@ -67,6 +67,7 @@ const DrawerNavigator = () => {
         />
         <Drawer.Screen name="Search" component={SearchScreen} />
 
+        {/* Toon login- en registerpagina's als gebruiker niet is ingelogd */}
         {!currentUser && (
           <>
             <Drawer.Screen name="Login" component={LoginScreen} />
@@ -74,6 +75,7 @@ const DrawerNavigator = () => {
           </>
         )}
 
+        {/* Toon profiel- en favorietenpagina's als gebruiker is ingelogd */}
         {currentUser && (
           <>
             <Drawer.Screen
