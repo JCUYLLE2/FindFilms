@@ -9,9 +9,9 @@ import RegisterScreen from '../screens/RegisterScreen';
 import LoginScreen from '../screens/LoginScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import FavoritesScreen from '../screens/FavoritesScreen';
-import { auth } from '../firebaseConfig';
-
-
+import { auth, db } from '../firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
+import { Text, View } from 'react-native';
 
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
@@ -25,24 +25,41 @@ const HomeStack = () => {
       }}
     >
       <Stack.Screen name="Home" component={HomeScreen} />
-      <Stack.Screen 
-  name="Details" 
-  component={DetailsScreen} 
-  options={{ headerShown: false }} // Zet dit naar true als je een header wilt zien
-/>
-
+      <Stack.Screen name="Details" component={DetailsScreen} />
     </Stack.Navigator>
   );
 };
 
 const DrawerNavigator = () => {
   const [currentUser, setCurrentUser] = useState(null);
+  const [userName, setUserName] = useState('');
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
       setCurrentUser(user);
+
+      if (user) {
+        try {
+          const docRef = doc(db, 'users', user.uid);
+          const docSnap = await getDoc(docRef);
+
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            setUserName(data.Name || 'Gebruiker');
+          } else {
+            console.warn('Document bestaat niet in Firestore.');
+            setUserName('Gebruiker');
+          }
+        } catch (error) {
+          console.error('Fout bij ophalen van gebruikersnaam:', error);
+          setUserName('Gebruiker');
+        }
+      } else {
+        setUserName('');
+      }
     });
-    return unsubscribe; // Cleanup
+
+    return unsubscribe;
   }, []);
 
   return (
@@ -64,6 +81,22 @@ const DrawerNavigator = () => {
           drawerLabelStyle: {
             fontSize: 16,
           },
+          // De tekst wordt volledig statisch weergegeven
+          headerTitle: () => (
+            <View>
+              <Text
+                selectable={false} // Tekst niet selecteerbaar of klikbaar
+                style={{
+                  color: '#FFD9DA',
+                  fontWeight: 'bold',
+                  fontSize: 18,
+                  textAlign: 'center',
+                }}
+              >
+                {currentUser ? `Welkom, ${userName}` : 'Welkom'}
+              </Text>
+            </View>
+          ),
         }}
       >
         {/* Home navigatie via HomeStack */}
@@ -88,7 +121,7 @@ const DrawerNavigator = () => {
             <Drawer.Screen
               name="Profile"
               component={ProfileScreen}
-              options={{ title: 'Profile' }}
+              options={{ title: 'Profiel' }}
             />
             <Drawer.Screen
               name="Favorites"

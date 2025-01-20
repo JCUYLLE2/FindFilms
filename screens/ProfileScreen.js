@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
-  Platform // <-- importeer Platform
+  Platform,
 } from 'react-native';
 import { auth, db } from '../firebaseConfig';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
@@ -21,32 +21,33 @@ const ProfileScreen = ({ navigation }) => {
   const [country, setCountry] = useState('');
   const [age, setAge] = useState('');
 
-  // Bij inladen van het scherm: haal de bestaande profielgegevens op
+  // Bij inladen van het scherm: controleer of de gebruiker is ingelogd
   useEffect(() => {
-    const fetchProfile = async () => {
-      if (user) {
+    if (!user) {
+      // Gebruiker is niet ingelogd, stuur door naar LoginScreen
+      navigation.replace('Login');
+    } else {
+      // Haal de bestaande profielgegevens op
+      const fetchProfile = async () => {
         try {
-          // Document in Firestore: /users/<uid>
           const docRef = doc(db, 'users', user.uid);
           const docSnap = await getDoc(docRef);
 
           if (docSnap.exists()) {
             const data = docSnap.data();
-            // Vul de state met wat we uit Firestore lezen
             setName(data.Name || '');
             setCity(data.City || '');
             setCountry(data.Country || '');
-            // age is waarschijnlijk een getal; we zetten het even naar string voor de TextInput
             setAge(data.age?.toString() || '');
           }
         } catch (error) {
           console.error('Fout bij ophalen profielgegevens:', error);
         }
-      }
-    };
+      };
 
-    fetchProfile();
-  }, [user]);
+      fetchProfile();
+    }
+  }, [user, navigation]);
 
   // Opslaan in Firestore
   const handleSaveProfile = async () => {
@@ -55,11 +56,9 @@ const ProfileScreen = ({ navigation }) => {
     try {
       const docRef = doc(db, 'users', user.uid);
       await setDoc(docRef, {
-        // Let op: je schrijft exact de velden zoals in je Firestore-structuur
         Name: name,
         City: city,
         Country: country,
-        // Convert age naar een getal als je wilt opslaan als Number
         age: Number(age),
       });
       Alert.alert('Succes', 'Profielgegevens opgeslagen!');
@@ -72,9 +71,9 @@ const ProfileScreen = ({ navigation }) => {
   const handleLogout = async () => {
     try {
       await auth.signOut();
-      navigation.replace('Home');
+      navigation.replace('Login');
     } catch (error) {
-      console.error('Error during logout:', error.message);
+      console.error('Error tijdens uitloggen:', error.message);
     }
   };
 
@@ -113,7 +112,7 @@ const ProfileScreen = ({ navigation }) => {
             onChangeText={setCountry}
           />
 
-          {/* age */}
+          {/* Age */}
           <TextInput
             style={styles.input}
             placeholder="Leeftijd"
@@ -163,15 +162,12 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
-    // Als we op web zitten: 400px breed, anders 100% (mobiel vult hele breedte)
     width: Platform.OS === 'web' ? 400 : '100%',
     backgroundColor: '#FFF',
     padding: 10,
     borderRadius: 8,
     marginBottom: 12,
     fontSize: 16,
-    // Eventueel kun je nog maxWidth gebruiken voor kleine schermen:
-    // maxWidth: '80%',
   },
   saveButton: {
     backgroundColor: '#4CBB17',
