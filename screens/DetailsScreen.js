@@ -79,9 +79,14 @@ const DetailsScreen = ({ route, navigation }) => {
 
       {/* Kader voor titel, beschrijving en details */}
       <View style={styles.detailsContainer}>
-        {/* Linkerkant: Titel en Beschrijving */}
+        {/* Linkerkant: Titel, Beschrijving en Hartje */}
         <View style={styles.leftSection}>
-          <Text style={styles.title}>{movie.title}</Text>
+          <View style={styles.titleRow}>
+            <Text style={styles.title}>{movie.title}</Text>
+            <TouchableOpacity onPress={handleFavorite}>
+              <Text style={styles.heartIcon}>{isFavorite ? '❤️' : '🤍'}</Text>
+            </TouchableOpacity>
+          </View>
           <Text style={styles.overview}>{movie.overview}</Text>
         </View>
 
@@ -154,11 +159,20 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingLeft: 10,
   },
+  titleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#FFD9DA',
-    marginBottom: 10,
+  },
+  heartIcon: {
+    fontSize: 24,
+    color: '#FFD9DA',
   },
   overview: {
     fontSize: 16,
@@ -177,21 +191,21 @@ const styles = StyleSheet.create({
   },
   scoreContainer: {
     marginTop: 10,
-    padding: 3, // Nog kleiner padding
+    padding: 3,
     backgroundColor: '#AC274F',
-    borderRadius: 8, // Kleinere afgeronde hoeken
+    borderRadius: 8,
     alignItems: 'center',
-    width: '30%', // Nog smaller
+    width: '30%',
     alignSelf: 'center',
   },
   scoreLabel: {
-    fontSize: 16, // Nog kleiner
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#FFD9DA',
     marginBottom: 2,
   },
   scoreValue: {
-    fontSize: 14, // Nog kleiner
+    fontSize: 14,
     fontWeight: 'bold',
     color: '#FFD9DA',
   },
