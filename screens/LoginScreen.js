@@ -19,7 +19,7 @@ const LoginScreen = ({ navigation }) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       Alert.alert('Succes', 'Je bent ingelogd!');
-      navigation.navigate('Home');
+      navigation.navigate('HomeStack');
     } catch (error) {
       Alert.alert('Error', error.message);
     }
