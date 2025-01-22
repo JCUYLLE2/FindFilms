@@ -7,8 +7,7 @@ import {
   Image, 
   TouchableOpacity, 
   Dimensions, 
-  Alert, 
-  Platform 
+  Alert 
 } from 'react-native';
 import { auth, db } from '../firebaseConfig';
 import { doc, setDoc, deleteDoc, getDoc } from 'firebase/firestore';
@@ -80,21 +79,31 @@ const DetailsScreen = ({ route, navigation }) => {
 
       {/* Kader voor titel, beschrijving en details */}
       <View style={styles.detailsContainer}>
-        <View style={styles.titleRow}>
+        {/* Linkerkant: Titel en Beschrijving */}
+        <View style={styles.leftSection}>
           <Text style={styles.title}>{movie.title}</Text>
-          <TouchableOpacity onPress={handleFavorite}>
-            <Text style={styles.heartIcon}>{isFavorite ? '❤️' : '🤍'}</Text>
-          </TouchableOpacity>
+          <Text style={styles.overview}>{movie.overview}</Text>
         </View>
-        <Text style={styles.overview}>{movie.overview}</Text>
 
-        {/* Details */}
-        <View style={styles.extraDetails}>
+        {/* Rechterkant: Extra Details */}
+        <View style={styles.rightSection}>
           <Text style={styles.detail}>
             <Text style={styles.detailLabel}>Originele Titel:</Text> {movie.original_title}
           </Text>
           <Text style={styles.detail}>
+            <Text style={styles.detailLabel}>Taal:</Text> {movie.original_language.toUpperCase()}
+          </Text>
+          <Text style={styles.detail}>
+            <Text style={styles.detailLabel}>Populariteit:</Text> {movie.popularity}
+          </Text>
+          <Text style={styles.detail}>
             <Text style={styles.detailLabel}>Release Datum:</Text> {movie.release_date}
+          </Text>
+          <Text style={styles.detail}>
+            <Text style={styles.detailLabel}>Video Beschikbaar:</Text> {movie.video ? 'Ja' : 'Nee'}
+          </Text>
+          <Text style={styles.detail}>
+            <Text style={styles.detailLabel}>Aantal Stemmen:</Text> {movie.vote_count}
           </Text>
           <View style={styles.scoreContainer}>
             <Text style={styles.scoreLabel}>Gemiddelde Score:</Text>
@@ -134,29 +143,28 @@ const styles = StyleSheet.create({
     backgroundColor: '#191516',
     padding: 15,
     borderRadius: 10,
-  },
-  titleRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
+  },
+  leftSection: {
+    flex: 1,
+    paddingRight: 10,
+  },
+  rightSection: {
+    flex: 1,
+    paddingLeft: 10,
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#FFD9DA',
-  },
-  heartIcon: {
-    fontSize: 24,
-    color: '#FFD9DA',
+    marginBottom: 10,
   },
   overview: {
     fontSize: 16,
     color: '#EB638B',
     marginBottom: 20,
-  },
-  extraDetails: {
-    marginTop: 10,
+    lineHeight: 22,
   },
   detail: {
     fontSize: 14,
@@ -169,18 +177,21 @@ const styles = StyleSheet.create({
   },
   scoreContainer: {
     marginTop: 10,
+    padding: 3, // Nog kleiner padding
     backgroundColor: '#AC274F',
-    padding: 10,
-    borderRadius: 10,
+    borderRadius: 8, // Kleinere afgeronde hoeken
     alignItems: 'center',
+    width: '30%', // Nog smaller
+    alignSelf: 'center',
   },
   scoreLabel: {
-    fontSize: 16,
+    fontSize: 16, // Nog kleiner
     fontWeight: 'bold',
     color: '#FFD9DA',
+    marginBottom: 2,
   },
   scoreValue: {
-    fontSize: 20,
+    fontSize: 14, // Nog kleiner
     fontWeight: 'bold',
     color: '#FFD9DA',
   },
