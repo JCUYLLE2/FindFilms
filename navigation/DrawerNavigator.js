@@ -11,24 +11,31 @@ import ProfileScreen from '../screens/ProfileScreen';
 import FavoritesScreen from '../screens/FavoritesScreen';
 import { auth, db } from '../firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
-import { Text, View } from 'react-native';
+import { Text } from 'react-native';
 
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
 
-// HomeStack voor HomeScreen en DetailsScreen
-const HomeStack = () => {
-  return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: false, // Voorkomt dubbele headers
-      }}
-    >
-      <Stack.Screen name="Home" component={HomeScreen} />
-      <Stack.Screen name="Details" component={DetailsScreen} />
-    </Stack.Navigator>
-  );
-};
+const HomeStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="Home" component={HomeScreen} />
+    <Stack.Screen name="Details" component={DetailsScreen} />
+  </Stack.Navigator>
+);
+
+const SearchStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="Search" component={SearchScreen} />
+    <Stack.Screen name="Details" component={DetailsScreen} />
+  </Stack.Navigator>
+);
+
+const FavoritesStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="Favorites" component={FavoritesScreen} />
+    <Stack.Screen name="Details" component={DetailsScreen} />
+  </Stack.Navigator>
+);
 
 const DrawerNavigator = () => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -47,11 +54,9 @@ const DrawerNavigator = () => {
             const data = docSnap.data();
             setUserName(data.Name || 'Gebruiker');
           } else {
-            console.warn('Document bestaat niet in Firestore.');
             setUserName('Gebruiker');
           }
         } catch (error) {
-          console.error('Fout bij ophalen van gebruikersnaam:', error);
           setUserName('Gebruiker');
         }
       } else {
@@ -66,68 +71,32 @@ const DrawerNavigator = () => {
     <NavigationContainer>
       <Drawer.Navigator
         screenOptions={{
-          headerStyle: {
-            backgroundColor: '#2E282A',
-          },
+          headerStyle: { backgroundColor: '#2E282A' },
           headerTintColor: '#FFD9DA',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-          drawerStyle: {
-            backgroundColor: '#191516',
-          },
+          headerTitleStyle: { fontWeight: 'bold' },
+          drawerStyle: { backgroundColor: '#191516' },
           drawerActiveTintColor: '#FFD9DA',
           drawerInactiveTintColor: '#EB638B',
-          drawerLabelStyle: {
-            fontSize: 16,
-          },
-          // De tekst wordt volledig statisch weergegeven
+          drawerLabelStyle: { fontSize: 16 },
           headerTitle: () => (
-            <View>
-              <Text
-                selectable={false} // Tekst niet selecteerbaar of klikbaar
-                style={{
-                  color: '#FFD9DA',
-                  fontWeight: 'bold',
-                  fontSize: 18,
-                  textAlign: 'center',
-                }}
-              >
-                {currentUser ? `Welkom, ${userName}` : 'Welkom'}
-              </Text>
-            </View>
+            <Text style={{ color: '#FFD9DA', fontSize: 18 }}>
+              Welkom, {userName || 'Gast'}
+            </Text>
           ),
         }}
       >
-        {/* Home navigatie via HomeStack */}
-        <Drawer.Screen
-          name="HomeStack"
-          component={HomeStack}
-          options={{ title: 'Home' }}
-        />
-        <Drawer.Screen name="Search" component={SearchScreen} />
-
-        {/* Toon login- en registerpagina's als gebruiker niet is ingelogd */}
+        <Drawer.Screen name="HomeStack" component={HomeStack} options={{ title: 'Home' }} />
+        <Drawer.Screen name="SearchStack" component={SearchStack} options={{ title: 'Zoeken' }} />
+        {currentUser && (
+          <>
+            <Drawer.Screen name="FavoritesStack" component={FavoritesStack} options={{ title: 'Favorieten' }} />
+            <Drawer.Screen name="Profile" component={ProfileScreen} options={{ title: 'Profiel' }} />
+          </>
+        )}
         {!currentUser && (
           <>
             <Drawer.Screen name="Login" component={LoginScreen} />
             <Drawer.Screen name="Register" component={RegisterScreen} />
-          </>
-        )}
-
-        {/* Toon profiel- en favorietenpagina's als gebruiker is ingelogd */}
-        {currentUser && (
-          <>
-            <Drawer.Screen
-              name="Profile"
-              component={ProfileScreen}
-              options={{ title: 'Profiel' }}
-            />
-            <Drawer.Screen
-              name="Favorites"
-              component={FavoritesScreen}
-              options={{ title: 'Favorieten' }}
-            />
           </>
         )}
       </Drawer.Navigator>

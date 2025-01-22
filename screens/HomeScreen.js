@@ -6,21 +6,62 @@ import {
   Image,
   StyleSheet,
   Dimensions,
-  Pressable, // Gebruik Pressable in plaats van TouchableWithoutFeedback
+  Pressable,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { auth, db } from '../firebaseConfig';
 import { collection, doc, setDoc, deleteDoc, getDocs } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
+import { useFocusEffect } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
 
 const HomeScreen = ({ navigation }) => {
+  const [currentUser, setCurrentUser] = useState(null);
   const [popularMovies, setPopularMovies] = useState([]);
   const [newMovies, setNewMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [favoriteMovieIds, setFavoriteMovieIds] = useState([]);
 
+  // Luister naar authenticatie veranderingen
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setCurrentUser(user);
+        await loadFavorites(user);
+      } else {
+        setCurrentUser(null);
+        setFavoriteMovieIds([]);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Haal de favorieten van de huidige gebruiker op
+  const loadFavorites = async (user) => {
+    try {
+      const colRef = collection(db, 'users', user.uid, 'favorites');
+      const querySnapshot = await getDocs(colRef);
+      const favIds = querySnapshot.docs.map((doc) => doc.id);
+      setFavoriteMovieIds(favIds);
+    } catch (error) {
+      console.error('Error fetching favorites:', error);
+    }
+  };
+
+  // Gebruik useFocusEffect om favorieten bij te werken bij terugkeer naar dit scherm
+  useFocusEffect(
+    React.useCallback(() => {
+      if (currentUser) {
+        loadFavorites(currentUser);
+      }
+    }, [currentUser])
+  );
+
+  // Haal films op bij het laden van het scherm
   useEffect(() => {
     const fetchMovies = async () => {
       try {
@@ -45,36 +86,21 @@ const HomeScreen = ({ navigation }) => {
     fetchMovies();
   }, []);
 
-  useEffect(() => {
-    const fetchFavorites = async () => {
-      if (!auth.currentUser) return;
-      try {
-        const colRef = collection(db, 'users', auth.currentUser.uid, 'favorites');
-        const querySnapshot = await getDocs(colRef);
-        const favIds = querySnapshot.docs.map((doc) => doc.id);
-        setFavoriteMovieIds(favIds);
-      } catch (error) {
-        console.error('Error fetching favorites:', error);
-      }
-    };
-
-    fetchFavorites();
-  }, []);
-
   const handleFavorite = async (movie) => {
-    if (!auth.currentUser) {
+    if (!currentUser) {
       Alert.alert('Niet ingelogd', 'Log in om films als favoriet toe te voegen.');
       return;
     }
+
     const movieIdString = String(movie.id);
     const isFavorite = favoriteMovieIds.includes(movieIdString);
 
     try {
       if (isFavorite) {
-        await deleteDoc(doc(db, 'users', auth.currentUser.uid, 'favorites', movieIdString));
+        await deleteDoc(doc(db, 'users', currentUser.uid, 'favorites', movieIdString));
         setFavoriteMovieIds((prev) => prev.filter((id) => id !== movieIdString));
       } else {
-        await setDoc(doc(db, 'users', auth.currentUser.uid, 'favorites', movieIdString), {
+        await setDoc(doc(db, 'users', currentUser.uid, 'favorites', movieIdString), {
           title: movie.title,
           poster_path: movie.poster_path,
         });
@@ -109,7 +135,7 @@ const HomeScreen = ({ navigation }) => {
 
               return (
                 <Pressable
-                  key={item.id} // Gebruik Pressable in plaats van TouchableWithoutFeedback
+                  key={item.id}
                   onPress={() => navigation.navigate('Details', { movie: item })}
                 >
                   <View style={styles.movieCard}>
@@ -125,7 +151,7 @@ const HomeScreen = ({ navigation }) => {
                       </TouchableOpacity>
                     </View>
                   </View>
-                </Pressable> // Vervang ook hier TouchableWithoutFeedback door Pressable
+                </Pressable>
               );
             })}
           </View>
@@ -137,6 +163,7 @@ const HomeScreen = ({ navigation }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#AC274F" />
         <Text style={styles.loadingText}>Loading...</Text>
       </View>
     );
@@ -151,7 +178,7 @@ const HomeScreen = ({ navigation }) => {
 
       <TouchableOpacity
         style={styles.searchButton}
-        onPress={() => navigation.navigate('Search')}
+        onPress={() => navigation.navigate('SearchStack')}
       >
         <Text style={styles.searchButtonText}>Zoek naar jouw favoriete film</Text>
       </TouchableOpacity>
@@ -181,6 +208,7 @@ const styles = StyleSheet.create({
   loadingText: {
     color: '#FFD9DA',
     fontSize: 18,
+    marginTop: 10,
   },
   pageTitle: {
     fontSize: 28,
@@ -201,11 +229,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 30,
     alignSelf: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    marginBottom: 20,
   },
   searchButtonText: {
     fontSize: 16,
@@ -239,12 +263,22 @@ const styles = StyleSheet.create({
   poster: {
     borderRadius: 10,
   },
-  title: {
+  titleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginTop: 5,
+  },
+  title: {
     fontSize: 14,
     fontWeight: '600',
     textAlign: 'center',
     color: '#FFD9DA',
+    flex: 1,
+  },
+  heartText: {
+    fontSize: 18,
+    marginLeft: 10,
   },
   footer: {
     marginTop: 20,

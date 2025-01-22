@@ -12,22 +12,17 @@ import { auth, db } from '../firebaseConfig';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 const ProfileScreen = ({ navigation }) => {
-  // Huidige ingelogde gebruiker
   const user = auth.currentUser;
 
-  // State voor elk veld in Firestore
   const [name, setName] = useState('');
   const [city, setCity] = useState('');
   const [country, setCountry] = useState('');
   const [age, setAge] = useState('');
 
-  // Bij inladen van het scherm: controleer of de gebruiker is ingelogd
   useEffect(() => {
     if (!user) {
-      // Gebruiker is niet ingelogd, stuur door naar LoginScreen
       navigation.replace('Login');
     } else {
-      // Haal de bestaande profielgegevens op
       const fetchProfile = async () => {
         try {
           const docRef = doc(db, 'users', user.uid);
@@ -49,7 +44,6 @@ const ProfileScreen = ({ navigation }) => {
     }
   }, [user, navigation]);
 
-  // Opslaan in Firestore
   const handleSaveProfile = async () => {
     if (!user) return;
 
@@ -67,7 +61,6 @@ const ProfileScreen = ({ navigation }) => {
     }
   };
 
-  // Uitloggen
   const handleLogout = async () => {
     try {
       await auth.signOut();
@@ -84,8 +77,6 @@ const ProfileScreen = ({ navigation }) => {
       {user ? (
         <>
           <Text style={styles.info}>Ingelogd als: {user.email}</Text>
-
-          {/* Name */}
           <TextInput
             style={styles.input}
             placeholder="Naam"
@@ -93,8 +84,6 @@ const ProfileScreen = ({ navigation }) => {
             value={name}
             onChangeText={setName}
           />
-
-          {/* City */}
           <TextInput
             style={styles.input}
             placeholder="Stad"
@@ -102,8 +91,6 @@ const ProfileScreen = ({ navigation }) => {
             value={city}
             onChangeText={setCity}
           />
-
-          {/* Country */}
           <TextInput
             style={styles.input}
             placeholder="Land"
@@ -111,8 +98,6 @@ const ProfileScreen = ({ navigation }) => {
             value={country}
             onChangeText={setCountry}
           />
-
-          {/* Age */}
           <TextInput
             style={styles.input}
             placeholder="Leeftijd"
@@ -121,13 +106,9 @@ const ProfileScreen = ({ navigation }) => {
             value={age}
             onChangeText={setAge}
           />
-
-          {/* Opslaan-knop */}
           <TouchableOpacity style={styles.saveButton} onPress={handleSaveProfile}>
             <Text style={styles.saveText}>Opslaan</Text>
           </TouchableOpacity>
-
-          {/* Uitloggen-knop */}
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
             <Text style={styles.logoutText}>Uitloggen</Text>
           </TouchableOpacity>
@@ -139,9 +120,6 @@ const ProfileScreen = ({ navigation }) => {
   );
 };
 
-export default ProfileScreen;
-
-// ----------------- STYLES ----------------- //
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -194,3 +172,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
+export default ProfileScreen;

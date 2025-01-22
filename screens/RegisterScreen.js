@@ -1,113 +1,152 @@
 import React, { useState } from 'react';
 import {
   View,
+  Text,
   TextInput,
   TouchableOpacity,
-  Text,
-  Alert,
   StyleSheet,
-  Platform,
+  Alert,
+  ScrollView,
+  Dimensions,
 } from 'react-native';
+import { auth, db } from '../firebaseConfig';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebaseConfig';
+import { doc, setDoc } from 'firebase/firestore';
+
+const { width } = Dimensions.get('window');
 
 const RegisterScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [location, setLocation] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
+    if (!name.trim()) {
+      Alert.alert('Naam vereist', 'Voer alstublieft een naam in.');
+      return;
+    }
+
+    if (!email.trim() || !password.trim()) {
+      Alert.alert('Fout', 'E-mail en wachtwoord zijn verplicht.');
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert('Fout', 'Het wachtwoord moet minimaal 6 tekens bevatten.');
+      return;
+    }
+
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      Alert.alert('Succes', 'Account aangemaakt!');
-      navigation.navigate('Login');
+      setLoading(true);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Voeg de naam en locatie toe aan Firestore
+      const userRef = doc(db, 'users', user.uid);
+      await setDoc(userRef, { Name: name, Location: location });
+
+      Alert.alert('Succesvol geregistreerd', `Welkom, ${name}!`);
+      navigation.navigate('Feed');
     } catch (error) {
-      Alert.alert('Error', error.message);
+      console.error('Registratiefout:', error);
+      Alert.alert('Registratiefout', error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Registreren</Text>
+    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <Text style={styles.title}>Registreer</Text>
+
+      <TextInput
+        style={styles.input}
+        placeholder="Naam"
+        placeholderTextColor="#FFD9DA"
+        value={name}
+        onChangeText={setName}
+      />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Locatie"
+        placeholderTextColor="#FFD9DA"
+        value={location}
+        onChangeText={setLocation}
+      />
+
       <TextInput
         style={styles.input}
         placeholder="E-mail"
-        placeholderTextColor="#999"
+        placeholderTextColor="#FFD9DA"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
+        autoCapitalize="none"
       />
+
       <TextInput
         style={styles.input}
         placeholder="Wachtwoord"
-        placeholderTextColor="#999"
+        placeholderTextColor="#FFD9DA"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
       />
-      <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
-        <Text style={styles.registerText}>Registreren</Text>
-      </TouchableOpacity>
+
       <TouchableOpacity
-        onPress={() => navigation.navigate('Login')}
-        style={styles.loginLink}
+        style={[styles.button, loading && styles.buttonDisabled]}
+        onPress={handleRegister}
+        disabled={loading}
       >
-        <Text style={styles.loginText}>
-          Al een account? Log hier in!
-        </Text>
+        <Text style={styles.buttonText}>{loading ? 'Registreren...' : 'Registreer'}</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#382E31',
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#382E31',
     padding: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#FFD9DA',
     marginBottom: 20,
   },
   input: {
-    width: Platform.OS === 'web' ? 400 : '100%', // 400px breed op desktop
-    maxWidth: 400, // Maximale breedte
+    width: Math.min(width * 0.8, 400),
     height: 50,
+    backgroundColor: '#191516',
     borderColor: '#AC274F',
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 10,
+    color: '#FFD9DA',
     paddingHorizontal: 15,
+    fontSize: 16,
     marginBottom: 15,
-    fontSize: 16,
-    color: '#FFD9DA',
-    backgroundColor: '#191516',
   },
-  registerButton: {
-    backgroundColor: '#4CBB17',
+  button: {
+    backgroundColor: '#AC274F',
     paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 8,
+    paddingHorizontal: 25,
+    borderRadius: 10,
     alignItems: 'center',
-    marginBottom: 20,
-    width: Platform.OS === 'web' ? 400 : '100%',
-    maxWidth: 400, // Maximale breedte
   },
-  registerText: {
+  buttonText: {
     color: '#FFD9DA',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
   },
-  loginLink: {
-    marginTop: 10,
-  },
-  loginText: {
-    color: '#EB638B',
-    fontSize: 14,
-    textDecorationLine: 'underline',
+  buttonDisabled: {
+    backgroundColor: '#574350',
   },
 });
 

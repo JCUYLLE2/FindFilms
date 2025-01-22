@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import {
   View,
   TextInput,
-  Button,
+  TouchableOpacity,
+  Text,
   StyleSheet,
   Alert,
   Platform,
-  Text,
-  TouchableOpacity,
 } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
@@ -75,8 +74,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
-    width: Platform.OS === 'web' ? 400 : '100%', // 400px breed op desktop
-    maxWidth: 400, // Maximale breedte
+    width: Platform.OS === 'web' ? 400 : '100%',
+    maxWidth: 400,
     height: 50,
     borderColor: '#AC274F',
     borderWidth: 1,
@@ -95,7 +94,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
     width: Platform.OS === 'web' ? 400 : '100%',
-    maxWidth: 400, // Maximale breedte
+    maxWidth: 400,
   },
   loginText: {
     color: '#FFD9DA',
